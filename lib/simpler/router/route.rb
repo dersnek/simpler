@@ -15,6 +15,11 @@ module Simpler
         @method == method && path?(path)
       end
 
+      def params(env)
+        dynamic_part = find_dynamic_path_part(env['PATH_INFO'])
+        env['params'] = dynamic_part
+      end
+
       private
 
       def path?(path)
@@ -31,7 +36,7 @@ module Simpler
 
         comparison_result = compare_path_parts(requested_path, route_path)
 
-        return true if comparison_result.all { |result| result == true }
+        return true if comparison_result.all? { |result| result == true }
 
         false
       end
@@ -40,6 +45,24 @@ module Simpler
         requested_path.zip(route_path).map do |requested_path_part, route_path_part|
           requested_path_part == route_path_part || dynamic?(route_path_part)
         end
+      end
+
+      def find_dynamic_path_part(path)
+        return unless @is_dynamic
+
+        requested_path = path.split('/')
+        route_path = @path.split('/')
+        dynamic_part = {}
+
+        route_path.each_with_index do |route_path_part, index|
+          next unless dynamic?(route_path_part)
+
+          key = route_path_part.delete(':').to_sym
+          value = requested_path[index].to_i
+          dynamic_part = { key => value }
+        end
+
+        dynamic_part
       end
 
       def dynamic?(str)
