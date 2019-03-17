@@ -4,11 +4,14 @@ module Simpler
   class Controller
 
     attr_reader :name, :request, :response
+    attr_accessor :headers
 
     def initialize(env)
       @name = extract_name
       @request = Rack::Request.new(env)
       @response = Rack::Response.new
+      @headers = @response.headers
+      prepare_params
     end
 
     def make_response(action)
@@ -20,6 +23,10 @@ module Simpler
       write_response
 
       @response.finish
+    end
+
+    def status(status)
+      @response.status = status
     end
 
     private
@@ -43,12 +50,29 @@ module Simpler
     end
 
     def params
-      @request.params
+      @request.env['simpler.params']
     end
 
     def render(template)
+      return hash_template(template) if template.is_a?(Hash)
+
       @request.env['simpler.template'] = template
     end
 
+    def hash_template(template)
+      set_content_type(template)
+      @request.env['simpler.content_type'] = template.keys[0]
+      @request.env['simpler.template'] = template.values[0]
+    end
+
+    def set_content_type(template)
+      case template.keys[0]
+      when :plain then @response['Content-Type'] = 'text/plain'
+      end
+    end
+
+    def prepare_params
+      @request.env['simpler.params'] = @request.params.merge(@request.env['simpler.route_params'])
+    end
   end
 end
