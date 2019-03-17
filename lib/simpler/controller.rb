@@ -11,6 +11,7 @@ module Simpler
       @request = Rack::Request.new(env)
       @response = Rack::Response.new
       @headers = @response.headers
+      prepare_params
     end
 
     def make_response(action)
@@ -68,6 +69,10 @@ module Simpler
       case template.keys[0]
       when :plain then @response['Content-Type'] = 'text/plain'
       end
+    end
+
+    def prepare_params
+      @request.env['simpler.params'] = @request.params.merge(@request.env['simpler.route_params'])
     end
   end
 end
