@@ -49,7 +49,7 @@ module Simpler
     end
 
     def params
-      @request.env['params']
+      @request.env['simpler.params']
     end
 
     def render(template)
@@ -59,12 +59,12 @@ module Simpler
     end
 
     def hash_template(template)
-      content_header(template)
+      change_content_header(template)
       @request.env['simpler.content_type'] = template.keys[0]
       @request.env['simpler.template'] = template.values[0]
     end
 
-    def content_header(template)
+    def change_content_header(template)
       case template.keys[0]
       when :plain then @response['Content-Type'] = 'text/plain'
       end
