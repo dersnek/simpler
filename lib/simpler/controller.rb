@@ -60,12 +60,12 @@ module Simpler
     end
 
     def hash_template(template)
-      change_content_header(template)
+      set_content_type(template)
       @request.env['simpler.content_type'] = template.keys[0]
       @request.env['simpler.template'] = template.values[0]
     end
 
-    def change_content_header(template)
+    def set_content_type(template)
       case template.keys[0]
       when :plain then @response['Content-Type'] = 'text/plain'
       end

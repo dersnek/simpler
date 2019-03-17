@@ -16,7 +16,7 @@ module Simpler
       end
 
       def params(env)
-        return unless @is_dynamic
+        return {} unless @is_dynamic
 
         find_dynamic_path_parts(env['PATH_INFO'])
       end
